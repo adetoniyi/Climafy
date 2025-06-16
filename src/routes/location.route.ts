@@ -1,27 +1,37 @@
-import { Router } from "express";
-import {
-  addLocation,
-  getLocations,
-  updateLocation,
-  deleteLocation,
-} from "../controllers/location.controller";
-import authenticate from "../middlewares/auth.middleware";
+import express from "express";
+import * as locationController from "../controllers/location.controller";
+import { authenticate } from "../middlewares/auth.middleware";
 
-const router = Router();
+const router = express.Router();
 
+function asyncHandler(
+  fn: (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => any
+) {
+  return (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
+}
 /**
  * @swagger
  * tags:
- *   name: Location
- *   description: User Location Management
+ *   name: Locations
+ *   description: Manage user locations
  */
 
 /**
  * @swagger
- * /location:
+ * /api/locations:
  *   post:
- *     summary: Add a new location
- *     tags: [Location]
+ *     summary: Add a new location for the user
+ *     tags: [Locations]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -37,40 +47,49 @@ const router = Router();
  *             properties:
  *               name:
  *                 type: string
+ *                 example: Home
  *               latitude:
  *                 type: number
+ *                 example: 6.5244
  *               longitude:
  *                 type: number
+ *                 example: 3.3792
  *     responses:
  *       201:
  *         description: Location added successfully
  *       400:
- *         description: Bad request
+ *         description: Invalid request body
  */
-router.post("/", authenticate, addLocation);
+router.post("/", asyncHandler(authenticate), locationController.createLocation);
 
 /**
  * @swagger
- * /location:
+ * /api/locations:
  *   get:
- *     summary: Get all user locations
- *     tags: [Location]
+ *     summary: Get all locations for the authenticated user
+ *     tags: [Locations]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of user locations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
  *       401:
  *         description: Unauthorized
  */
-router.get("/", authenticate, getLocations);
+router.get("/", asyncHandler(authenticate), locationController.getLocations);
 
 /**
  * @swagger
- * /location/{id}:
+ * /api/locations/{id}:
  *   put:
- *     summary: Update a specific location
- *     tags: [Location]
+ *     summary: Update a location by ID
+ *     tags: [Locations]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -89,24 +108,31 @@ router.get("/", authenticate, getLocations);
  *             properties:
  *               name:
  *                 type: string
+ *                 example: Work
  *               latitude:
  *                 type: number
+ *                 example: 6.6000
  *               longitude:
  *                 type: number
+ *                 example: 3.4000
  *     responses:
  *       200:
  *         description: Location updated successfully
  *       404:
  *         description: Location not found
  */
-router.put("/:id", authenticate, updateLocation);
+router.put(
+  "/:id",
+  asyncHandler(authenticate),
+  asyncHandler(locationController.editLocation)
+);
 
 /**
  * @swagger
- * /location/{id}:
+ * /api/locations/{id}:
  *   delete:
- *     summary: Delete a specific location
- *     tags: [Location]
+ *     summary: Delete a location by ID
+ *     tags: [Locations]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -122,6 +148,10 @@ router.put("/:id", authenticate, updateLocation);
  *       404:
  *         description: Location not found
  */
-router.delete("/:id", authenticate, deleteLocation);
+router.delete(
+  "/:id",
+  asyncHandler(authenticate),
+  asyncHandler(locationController.removeLocation)
+);
 
 export default router;

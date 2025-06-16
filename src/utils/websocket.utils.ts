@@ -1,29 +1,19 @@
-import { Server as HttpServer } from "http";
-import { WebSocketServer } from "ws";
+import { Server } from "socket.io";
 
-let wss: WebSocketServer;
+let io: Server;
 
-export const setupWebSocket = (server: HttpServer) => {
-  wss = new WebSocketServer({ server });
-
-  wss.on("connection", (ws) => {
-    console.log("New WebSocket client connected");
-
-    ws.send(JSON.stringify({ message: "WebSocket connection established." }));
-
-    ws.on("close", () => {
-      console.log("WebSocket client disconnected");
-    });
+export const setupWebSocket = (server: Server) => {
+  io = server;
+  io.on("connection", (socket) => {
+    console.log("Client connected:", socket.id);
+    socket.on("disconnect", () =>
+      console.log("Client disconnected:", socket.id)
+    );
   });
 };
 
-export const broadcastAlert = (data: object) => {
-  if (!wss) return;
-
-  wss.clients.forEach((client) => {
-    if (client.readyState === 1) {
-      // 1 = OPEN
-      client.send(JSON.stringify(data));
-    }
-  });
+export const broadcastSevereAlert = (message: string) => {
+  if (io) {
+    io.emit("severe-weather-alert", { message });
+  }
 };

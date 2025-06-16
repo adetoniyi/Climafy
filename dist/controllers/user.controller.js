@@ -42,42 +42,27 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteAlert = exports.getAlerts = exports.createAlert = void 0;
-const alertService = __importStar(require("../services/alert.service"));
-const createAlert = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+exports.updatePreferences = exports.getPreferences = void 0;
+const userService = __importStar(require("../services/user.service"));
+const getPreferences = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.user.id;
-        const { locationId, type, condition, threshold } = req.body;
-        const alert = yield alertService.createCustomAlert(userId, locationId, type, condition, threshold);
-        res.status(201).json(alert);
+        const preferences = yield userService.getUserPreferences(userId);
+        res.status(200).json(preferences);
     }
     catch (error) {
         next(error);
     }
 });
-exports.createAlert = createAlert;
-const getAlerts = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+exports.getPreferences = getPreferences;
+const updatePreferences = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = req.user.id;
-        const alerts = yield alertService.getUserAlerts(userId);
-        res.status(200).json(alerts);
+        const updatedPreferences = yield userService.updateUserPreferences(userId, req.body);
+        res.status(200).json(updatedPreferences);
     }
     catch (error) {
         next(error);
     }
 });
-exports.getAlerts = getAlerts;
-const deleteAlert = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const alertId = req.params.id;
-        const userId = req.user.id;
-        const alert = yield alertService.deleteCustomAlert(alertId, userId);
-        if (!alert)
-            return res.status(404).json({ message: "Alert not found" });
-        res.status(200).json({ message: "Alert deleted" });
-    }
-    catch (error) {
-        next(error);
-    }
-});
-exports.deleteAlert = deleteAlert;
+exports.updatePreferences = updatePreferences;

@@ -1,54 +1,68 @@
-import { Request, Response } from "express";
-import {
-  fetchCurrentWeather,
-  fetchDailyForecast,
-  fetchHourlyForecast,
-} from "../services/weather.service";
+import { Request, Response, NextFunction } from "express";
+import * as weatherService from "../services/weather.service";
 
-export const getCurrentWeather = async (req: Request, res: Response) => {
+export const getCurrent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const { lat, lon, units } = req.query;
-    const weather = await fetchCurrentWeather(
+    const { lat, lon } = req.query;
+    if (!lat || !lon)
+      return res
+        .status(400)
+        .json({ message: "Latitude and Longitude required" });
+
+    const data = await weatherService.fetchCurrentWeather(
       Number(lat),
-      Number(lon),
-      units as string
+      Number(lon)
     );
-    res.json(weather);
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Failed to fetch current weather", error: err });
+    res.status(200).json(data);
+  } catch (error) {
+    next(error);
   }
 };
 
-export const getDailyForecast = async (req: Request, res: Response) => {
+export const getHourly = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const { lat, lon, units } = req.query;
-    const forecast = await fetchDailyForecast(
+    const { lat, lon } = req.query;
+    if (!lat || !lon)
+      return res
+        .status(400)
+        .json({ message: "Latitude and Longitude required" });
+
+    const data = await weatherService.fetchHourlyForecast(
       Number(lat),
-      Number(lon),
-      units as string
+      Number(lon)
     );
-    res.json(forecast);
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Failed to fetch daily forecast", error: err });
+    res.status(200).json(data);
+  } catch (error) {
+    next(error);
   }
 };
 
-export const getHourlyForecast = async (req: Request, res: Response) => {
+export const getDaily = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const { lat, lon, units } = req.query;
-    const forecast = await fetchHourlyForecast(
+    const { lat, lon } = req.query;
+    if (!lat || !lon)
+      return res
+        .status(400)
+        .json({ message: "Latitude and Longitude required" });
+
+    const data = await weatherService.fetchDailyForecast(
       Number(lat),
-      Number(lon),
-      units as string
+      Number(lon)
     );
-    res.json(forecast);
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Failed to fetch hourly forecast", error: err });
+    res.status(200).json(data);
+  } catch (error) {
+    next(error);
   }
 };

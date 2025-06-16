@@ -1,59 +1,56 @@
-import { Request, Response } from "express";
-import { fetchSevereWeatherAlerts } from "../services/alert.service";
-import { Alert } from "../models/alert";
+import { Request, Response, NextFunction } from "express";
+import * as alertService from "../services/alert.service";
 
-// Extend Express Request interface to include 'user'
-interface AuthenticatedRequest extends Request {
-  user: { id: string };
-}
-
-export const getSevereAlerts = async (req: Request, res: Response) => {
-  try {
-    const { lat, lon } = req.query;
-    const alerts = await fetchSevereWeatherAlerts(Number(lat), Number(lon));
-    res.json(alerts);
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Failed to fetch severe weather alerts", error: err });
-  }
-};
-
-export const createCustomAlert = async (
-  req: AuthenticatedRequest,
-  res: Response
+export const createAlert = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
 ) => {
   try {
-    const userId = req.user.id;
-    const alert = new Alert({ ...req.body, user: userId });
-    await alert.save();
+    const userId = req.user!.id;
+    const { locationId, type, condition, threshold } = req.body;
+
+    const alert = await alertService.createCustomAlert(
+      userId,
+      locationId,
+      type,
+      condition,
+      threshold
+    );
+
     res.status(201).json(alert);
-  } catch (err) {
-    res
-      .status(400)
-      .json({ message: "Failed to create custom alert", error: err });
+  } catch (error) {
+    next(error);
   }
 };
 
-export const getUserCustomAlerts = async (
-  req: AuthenticatedRequest,
-  res: Response
+export const getAlerts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
 ) => {
   try {
-    const alerts = await Alert.find({ user: req.user.id });
-    res.json(alerts);
-  } catch (err) {
-    res
-      .status(500)
-      .json({ message: "Failed to fetch custom alerts", error: err });
+    const userId = req.user!.id;
+    const alerts = await alertService.getUserAlerts(userId);
+    res.status(200).json(alerts);
+  } catch (error) {
+    next(error);
   }
 };
 
-// TODO: Import or define 'signupSchema' before using it, for example:
-// import { signupSchema } from '../schemas/signup.schema';
-// or define it here if appropriate.
+export const deleteAlert = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const alertId = req.params.id;
+    const userId = req.user!.id;
+    const alert = await alertService.deleteCustomAlert(alertId, userId);
 
-// const parsed = signupSchema.safeParse(req.body);
-// if (!parsed.success) {
-//   return res.status(400).json({ message: parsed.error.errors[0].message });
-// }
+    if (!alert) return res.status(404).json({ message: "Alert not found" });
+    res.status(200).json({ message: "Alert deleted" });
+  } catch (error) {
+    next(error);
+  }
+};

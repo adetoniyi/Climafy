@@ -1,30 +1,28 @@
-import mongoose, { Schema, Document } from "mongoose";
+import { Schema, model, Document, Types } from "mongoose";
 
 export interface IAlert extends Document {
-  user: mongoose.Types.ObjectId;
-  type: "temperature" | "humidity" | "windSpeed"; // Type of alert
-  location: mongoose.Types.ObjectId; // Reference to the location
-  condition: string; // Condition for the alert, e.g., "temperature > 30"
-  threshold: number; // Threshold value for the alert
-  triggered: boolean; // Whether the alert has been triggered
-  notified?: boolean; // Whether the user has been notified
+  user: Types.ObjectId;
+  location: Types.ObjectId;
+  type: "temperature" | "wind" | "humidity";
+  condition: "gt" | "lt" | "eq"; // Greater than, Less than, Equal
+  threshold: number;
+  active: boolean;
 }
 
-const alertSchema = new Schema<IAlert>(
+const AlertSchema = new Schema<IAlert>(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    location: { type: Schema.Types.ObjectId, ref: "Location", required: true },
     type: {
       type: String,
-      enum: ["temperature", "humidity", "windSpeed"],
+      enum: ["temperature", "wind", "humidity"],
       required: true,
     },
-    location: { type: Schema.Types.ObjectId, ref: "Location", required: true },
-    condition: { type: String, required: true }, // e.g., "temperature > 30"
-    threshold: { type: Number, required: true }, // e.g., 30 for temperature alerts
-    notified: { type: Boolean, default: false }, // Whether the user has been notified
-    triggered: { type: Boolean, default: false }, // Whether the alert has been triggered
+    condition: { type: String, enum: ["gt", "lt", "eq"], required: true },
+    threshold: { type: Number, required: true },
+    active: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-export const Alert = mongoose.model<IAlert>("Alert", alertSchema);
+export default model<IAlert>("Alert", AlertSchema);

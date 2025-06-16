@@ -8,75 +8,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateProfile = exports.getProfile = exports.login = exports.signup = void 0;
-const bcrypt_1 = __importDefault(require("bcrypt"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const user_1 = __importDefault(require("../models/user"));
-const JWT_SECRET = process.env.JWT_SECRET;
-const signup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.login = exports.register = void 0;
+const user_service_1 = require("../services/user.service");
+const token_util_1 = require("../utils/token.util");
+const register = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { username, email, password } = req.body;
-        const exists = yield user_1.default.findOne({ email });
-        if (exists)
-            return res.status(400).json({ message: "Email already in use" });
-        const hashedPassword = yield bcrypt_1.default.hash(password, 10);
-        const user = yield user_1.default.create({
-            username,
-            email,
-            password: hashedPassword,
-        });
-        res
-            .status(201)
-            .json({ message: "User created successfully", userId: user._id });
+        const user = (yield (0, user_service_1.registerUser)(username, email, password));
+        const token = (0, token_util_1.generateToken)(user._id.toString(), user.role);
+        res.status(201).json({ user, token });
     }
-    catch (err) {
-        res.status(500).json({ message: "Signup failed", error: err });
+    catch (error) {
+        next(error);
     }
 });
-exports.signup = signup;
-const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.register = register;
+const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password } = req.body;
-        const user = yield user_1.default.findOne({ email });
-        if (!user)
-            return res.status(400).json({ message: "Invalid credentials" });
-        const isMatch = yield bcrypt_1.default.compare(password, user.password);
-        if (!isMatch)
-            return res.status(400).json({ message: "Invalid credentials" });
-        const token = jsonwebtoken_1.default.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
-        res.status(200).json({ token });
+        const user = (yield (0, user_service_1.loginUser)(email, password));
+        const token = (0, token_util_1.generateToken)(user._id.toString(), user.role);
+        res.status(200).json({ user, token });
     }
-    catch (err) {
-        res.status(500).json({ message: "Login failed", error: err });
+    catch (error) {
+        next(error);
     }
 });
 exports.login = login;
-const getProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const user = yield user_1.default.findById(req.userId).select("-password");
-        if (!user)
-            return res.status(404).json({ message: "User not found" });
-        res.json(user);
-    }
-    catch (err) {
-        res.status(500).json({ message: "Failed to fetch profile", error: err });
-    }
-});
-exports.getProfile = getProfile;
-const updateProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const updates = req.body;
-        const user = yield user_1.default.findByIdAndUpdate(req.userId, updates, {
-            new: true,
-        }).select("-password");
-        res.json(user);
-    }
-    catch (err) {
-        res.status(500).json({ message: "Profile update failed", error: err });
-    }
-});
-exports.updateProfile = updateProfile;

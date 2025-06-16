@@ -32,3 +32,21 @@ export const loginUser = async (
 
   return user;
 };
+
+export const getUserPreferences = async (userId: string) => {
+  const user = await User.findById(userId).select("preferences");
+  if (!user) throw new Error("User not found");
+  return user.preferences;
+};
+
+export const updateUserPreferences = async (
+  userId: string,
+  preferences: any
+) => {
+  const user = await User.findById(userId);
+  if (!user) throw new Error("User not found");
+
+  user.preferences = { ...user.preferences, ...preferences };
+  await user.save();
+  return user.preferences;
+};

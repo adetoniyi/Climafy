@@ -1,107 +1,100 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = __importDefault(require("express"));
+const express_1 = require("express");
 const auth_controller_1 = require("../controllers/auth.controller");
-const auth_middleware_1 = require("../middlewares/auth.middleware");
-const router = express_1.default.Router();
-//Utility to wrap async route handlers and forward errors to Express error handler.
-function asyncHandler(fn) {
-    return (req, res, next) => {
-        Promise.resolve(fn(req, res, next)).catch(next);
-    };
-}
+const router = (0, express_1.Router)();
 /**
  * @swagger
  * tags:
- *   name: Auth
- *   description: User authentication and profile management
+ *   name: Authentication
+ *   description: User Authentication Endpoints
  */
 /**
  * @swagger
- * /api/signup:
+ * /api/auth/register:
  *   post:
  *     summary: Register a new user
- *     tags: [Auth]
+ *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required: [username, email, password]
+ *             required:
+ *               - username
+ *               - email
+ *               - password
  *             properties:
  *               username:
  *                 type: string
+ *                 example: johndoe
  *               email:
  *                 type: string
+ *                 example: johndoe@example.com
  *               password:
  *                 type: string
+ *                 example: password123
  *     responses:
  *       201:
- *         description: User created
+ *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                 token:
+ *                   type: string
+ *       400:
+ *         description: Bad Request
  */
-router.post("/signup", asyncHandler(auth_controller_1.signup));
+/**
+ * @route POST /api/auth/register
+ * @desc Register a new user
+ */
+router.post("/register", auth_controller_1.register);
 /**
  * @swagger
- * /api/login:
+ * /api/auth/login:
  *   post:
- *     summary: Log in a user
- *     tags: [Auth]
+ *     summary: Login user and get token
+ *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required: [email, password]
+ *             required:
+ *               - email
+ *               - password
  *             properties:
  *               email:
  *                 type: string
+ *                 example: johndoe@example.com
  *               password:
  *                 type: string
+ *                 example: password123
  *     responses:
  *       200:
- *         description: Login successful
+ *         description: User logged in successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                 token:
+ *                   type: string
+ *       401:
+ *         description: Invalid credentials
  */
-router.post("/login", asyncHandler(auth_controller_1.login));
 /**
- * @swagger
- * /api/profile:
- *   get:
- *     summary: Get current user's profile
- *     tags: [Auth]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: User profile data
+ * @route POST /api/auth/login
+ * @desc Login user and get token
  */
-router.get("/profile", asyncHandler(auth_middleware_1.authenticate), asyncHandler(auth_controller_1.getProfile));
-/**
- * @swagger
- * /api/profile:
- *   put:
- *     summary: Update current user's profile
- *     tags: [Auth]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *               preferences:
- *                 type: object
- *     responses:
- *       200:
- *         description: Updated profile
- */
-router.put("/profile", asyncHandler(auth_middleware_1.authenticate), auth_controller_1.updateProfile);
+router.post("/login", auth_controller_1.login);
 exports.default = router;

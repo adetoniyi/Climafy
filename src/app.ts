@@ -37,11 +37,11 @@ app.use(
   })
 );
 
+import alertRoutes from "./routes/alert.route";
 import authRoutes from "./routes/auth.route";
 import locationRoutes from "./routes/location.route";
+import userRoutes from "./routes/user.route";
 import weatherRoutes from "./routes/weather.route";
-import alertRoutes from "./routes/alert.route";
-import preferencesRoutes from "./routes/preferences.route";
 
 connectDB();
 
@@ -52,11 +52,11 @@ app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Routes
+app.use("/api/alerts", alertRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/locations", locationRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/weather", weatherRoutes);
-app.use("/api/alerts", alertRoutes);
-app.use("/api/preferences", preferencesRoutes);
 
 // Global Error Handler
 app.use(errorHandler);

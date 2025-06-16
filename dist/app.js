@@ -33,24 +33,22 @@ app.use("/api", (0, express_rate_limit_1.default)({
     max: 100,
     message: "Too many requests from this IP, please try again later.",
 }));
+const alert_route_1 = __importDefault(require("./routes/alert.route"));
 const auth_route_1 = __importDefault(require("./routes/auth.route"));
 const location_route_1 = __importDefault(require("./routes/location.route"));
+const user_route_1 = __importDefault(require("./routes/user.route"));
 const weather_route_1 = __importDefault(require("./routes/weather.route"));
-const alert_route_1 = __importDefault(require("./routes/alert.route"));
-const preferences_route_1 = __importDefault(require("./routes/preferences.route"));
-const admin_route_1 = __importDefault(require("./routes/admin.route"));
 (0, db_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 // Swagger
 app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swagger_1.swaggerSpec));
 // Routes
+app.use("/api/alerts", alert_route_1.default);
 app.use("/api/auth", auth_route_1.default);
 app.use("/api/locations", location_route_1.default);
+app.use("/api/users", user_route_1.default);
 app.use("/api/weather", weather_route_1.default);
-app.use("/api/alerts", alert_route_1.default);
-app.use("/api/preferences", preferences_route_1.default);
-app.use("/api/admin", admin_route_1.default);
 // Global Error Handler
 app.use(error_middleware_1.errorHandler);
 app.use((err, _req, res, _next) => {

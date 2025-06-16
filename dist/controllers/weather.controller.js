@@ -1,4 +1,37 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -9,44 +42,50 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getHourlyForecast = exports.getDailyForecast = exports.getCurrentWeather = void 0;
-const weather_service_1 = require("../services/weather.service");
-const getCurrentWeather = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.getDaily = exports.getHourly = exports.getCurrent = void 0;
+const weatherService = __importStar(require("../services/weather.service"));
+const getCurrent = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { lat, lon, units } = req.query;
-        const weather = yield (0, weather_service_1.fetchCurrentWeather)(Number(lat), Number(lon), units);
-        res.json(weather);
+        const { lat, lon } = req.query;
+        if (!lat || !lon)
+            return res
+                .status(400)
+                .json({ message: "Latitude and Longitude required" });
+        const data = yield weatherService.fetchCurrentWeather(Number(lat), Number(lon));
+        res.status(200).json(data);
     }
-    catch (err) {
-        res
-            .status(500)
-            .json({ message: "Failed to fetch current weather", error: err });
+    catch (error) {
+        next(error);
     }
 });
-exports.getCurrentWeather = getCurrentWeather;
-const getDailyForecast = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.getCurrent = getCurrent;
+const getHourly = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { lat, lon, units } = req.query;
-        const forecast = yield (0, weather_service_1.fetchDailyForecast)(Number(lat), Number(lon), units);
-        res.json(forecast);
+        const { lat, lon } = req.query;
+        if (!lat || !lon)
+            return res
+                .status(400)
+                .json({ message: "Latitude and Longitude required" });
+        const data = yield weatherService.fetchHourlyForecast(Number(lat), Number(lon));
+        res.status(200).json(data);
     }
-    catch (err) {
-        res
-            .status(500)
-            .json({ message: "Failed to fetch daily forecast", error: err });
+    catch (error) {
+        next(error);
     }
 });
-exports.getDailyForecast = getDailyForecast;
-const getHourlyForecast = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.getHourly = getHourly;
+const getDaily = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { lat, lon, units } = req.query;
-        const forecast = yield (0, weather_service_1.fetchHourlyForecast)(Number(lat), Number(lon), units);
-        res.json(forecast);
+        const { lat, lon } = req.query;
+        if (!lat || !lon)
+            return res
+                .status(400)
+                .json({ message: "Latitude and Longitude required" });
+        const data = yield weatherService.fetchDailyForecast(Number(lat), Number(lon));
+        res.status(200).json(data);
     }
-    catch (err) {
-        res
-            .status(500)
-            .json({ message: "Failed to fetch hourly forecast", error: err });
+    catch (error) {
+        next(error);
     }
 });
-exports.getHourlyForecast = getHourlyForecast;
+exports.getDaily = getDaily;

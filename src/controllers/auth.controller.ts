@@ -9,7 +9,10 @@ export const register = async (
 ) => {
   try {
     const { username, email, password } = req.body;
-    const user = await registerUser(username, email, password);
+    const user = (await registerUser(username, email, password)) as {
+      _id: any;
+      role: string;
+    };
     const token = generateToken(user._id.toString(), user.role);
     res.status(201).json({ user, token });
   } catch (error) {
@@ -24,7 +27,10 @@ export const login = async (
 ) => {
   try {
     const { email, password } = req.body;
-    const user = await loginUser(email, password);
+    const user = (await loginUser(email, password)) as {
+      _id: any;
+      role: string;
+    };
     const token = generateToken(user._id.toString(), user.role);
     res.status(200).json({ user, token });
   } catch (error) {
