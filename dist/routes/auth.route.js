@@ -28,10 +28,10 @@ const router = (0, express_1.Router)();
  *             properties:
  *               username:
  *                 type: string
- *                 example: johndoe
+ *                 example: Adeniyi Pelumi
  *               email:
  *                 type: string
- *                 example: johndoe@example.com
+ *                 example: adetoniyi@example.com
  *               password:
  *                 type: string
  *                 example: password123
@@ -73,7 +73,7 @@ router.post("/register", auth_controller_1.register);
  *             properties:
  *               email:
  *                 type: string
- *                 example: johndoe@example.com
+ *                 example: adetoniyi@example.com
  *               password:
  *                 type: string
  *                 example: password123

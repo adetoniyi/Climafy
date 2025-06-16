@@ -1,25 +1,37 @@
+import dotenv from "dotenv";
+import connectDB from "./config/db";
+import app from "./app";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import app from "./app";
-import mongoose from "mongoose";
-import { setupWebSocket } from "./utils/websocket.utils";
+import { setupWebSocket } from "./utils/websocket.utils"; // Your WebSocket handler function
+
+dotenv.config();
 
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || "";
 
-const server = createServer(app);
-const io = new Server(server, {
-  cors: { origin: "*" },
+// Create HTTP server from Express app
+const httpServer = createServer(app);
+
+// Setup WebSocket server (socket.io)
+const io = new Server(httpServer, {
+  cors: { origin: "*" }, // You can restrict this to your frontend URL in production
 });
 
-// Attach WebSocket handling
+// Initialize WebSocket handling logic
 setupWebSocket(io);
 
-// MongoDB connection
-mongoose
-  .connect(MONGO_URI)
-  .then(() => {
-    console.log("MongoDB connected");
-    server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch((err) => console.error("MongoDB connection error:", err));
+const startServer = async () => {
+  try {
+    await connectDB(); // Local MongoDB connection
+    httpServer.listen(PORT, () => {
+      console.log(
+        `HURRY🚀 Climafy local server with WebSocket running on port ${PORT}`
+      );
+    });
+  } catch (error) {
+    console.error("❌ Failed to start the server:", error);
+    process.exit(1);
+  }
+};
+
+startServer();

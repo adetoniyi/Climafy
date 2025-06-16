@@ -1,46 +1,37 @@
-import axios from "axios";
+/**
+ * Utility functions for handling unit conversions
+ * in the Climafy Weather API project.
+ */
 
-const OPENWEATHERMAP_API_KEY = process.env.OPENWEATHERMAP_API_KEY!;
-const BASE_URL = "https://api.openweathermap.org/data/2.5";
-
-export const fetchSevereWeatherAlerts = async (lat: number, lon: number) => {
-  const res = await axios.get(`${BASE_URL}/onecall`, {
-    params: {
-      lat,
-      lon,
-      exclude: "current,minutely,hourly,daily",
-      appid: OPENWEATHERMAP_API_KEY,
-    },
-  });
-
-  const data = res.data as { alerts?: any[] };
-  return data.alerts || [];
+// Convert temperature to Celsius or Fahrenheit
+export const convertTemperature = (
+  kelvin: number,
+  unit: "metric" | "imperial"
+): number => {
+  if (unit === "metric") {
+    return +(kelvin - 273.15).toFixed(2); // Celsius
+  } else if (unit === "imperial") {
+    return +(((kelvin - 273.15) * 9) / 5 + 32).toFixed(2); // Fahrenheit
+  }
+  return kelvin; // Default Kelvin
 };
 
-/**
- * Convert Celsius to Fahrenheit
- */
-export const celsiusToFahrenheit = (celsius: number): number => {
-  return (celsius * 9) / 5 + 32;
+// Convert wind speed to m/s or mph
+export const convertWindSpeed = (
+  speed: number,
+  unit: "metric" | "imperial"
+): number => {
+  if (unit === "imperial") {
+    return +(speed * 2.237).toFixed(2); // m/s to mph
+  }
+  return +speed.toFixed(2); // metric: m/s (no change)
 };
 
-/**
- * Convert Fahrenheit to Celsius
- */
-export const fahrenheitToCelsius = (fahrenheit: number): number => {
-  return ((fahrenheit - 32) * 5) / 9;
-};
-
-/**
- * Convert meters per second to miles per hour
- */
-export const msToMph = (ms: number): number => {
-  return ms * 2.23694;
-};
-
-/**
- * Convert miles per hour to meters per second
- */
-export const mphToMs = (mph: number): number => {
-  return mph / 2.23694;
+// Convert pressure to hPa or other units if needed (default hPa)
+export const convertPressure = (
+  pressure: number,
+  unit: "metric" | "imperial"
+): number => {
+  // For now, pressure remains in hPa for both systems
+  return pressure;
 };

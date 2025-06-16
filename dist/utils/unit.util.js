@@ -1,59 +1,32 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
+/**
+ * Utility functions for handling unit conversions
+ * in the Climafy Weather API project.
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.mphToMs = exports.msToMph = exports.fahrenheitToCelsius = exports.celsiusToFahrenheit = exports.fetchSevereWeatherAlerts = void 0;
-const axios_1 = __importDefault(require("axios"));
-const OPENWEATHERMAP_API_KEY = process.env.OPENWEATHERMAP_API_KEY;
-const BASE_URL = "https://api.openweathermap.org/data/2.5";
-const fetchSevereWeatherAlerts = (lat, lon) => __awaiter(void 0, void 0, void 0, function* () {
-    const res = yield axios_1.default.get(`${BASE_URL}/onecall`, {
-        params: {
-            lat,
-            lon,
-            exclude: "current,minutely,hourly,daily",
-            appid: OPENWEATHERMAP_API_KEY,
-        },
-    });
-    const data = res.data;
-    return data.alerts || [];
-});
-exports.fetchSevereWeatherAlerts = fetchSevereWeatherAlerts;
-/**
- * Convert Celsius to Fahrenheit
- */
-const celsiusToFahrenheit = (celsius) => {
-    return (celsius * 9) / 5 + 32;
+exports.convertPressure = exports.convertWindSpeed = exports.convertTemperature = void 0;
+// Convert temperature to Celsius or Fahrenheit
+const convertTemperature = (kelvin, unit) => {
+    if (unit === "metric") {
+        return +(kelvin - 273.15).toFixed(2); // Celsius
+    }
+    else if (unit === "imperial") {
+        return +(((kelvin - 273.15) * 9) / 5 + 32).toFixed(2); // Fahrenheit
+    }
+    return kelvin; // Default Kelvin
 };
-exports.celsiusToFahrenheit = celsiusToFahrenheit;
-/**
- * Convert Fahrenheit to Celsius
- */
-const fahrenheitToCelsius = (fahrenheit) => {
-    return ((fahrenheit - 32) * 5) / 9;
+exports.convertTemperature = convertTemperature;
+// Convert wind speed to m/s or mph
+const convertWindSpeed = (speed, unit) => {
+    if (unit === "imperial") {
+        return +(speed * 2.237).toFixed(2); // m/s to mph
+    }
+    return +speed.toFixed(2); // metric: m/s (no change)
 };
-exports.fahrenheitToCelsius = fahrenheitToCelsius;
-/**
- * Convert meters per second to miles per hour
- */
-const msToMph = (ms) => {
-    return ms * 2.23694;
+exports.convertWindSpeed = convertWindSpeed;
+// Convert pressure to hPa or other units if needed (default hPa)
+const convertPressure = (pressure, unit) => {
+    // For now, pressure remains in hPa for both systems
+    return pressure;
 };
-exports.msToMph = msToMph;
-/**
- * Convert miles per hour to meters per second
- */
-const mphToMs = (mph) => {
-    return mph / 2.23694;
-};
-exports.mphToMs = mphToMs;
+exports.convertPressure = convertPressure;

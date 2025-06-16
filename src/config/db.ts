@@ -1,16 +1,17 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const MONGODB_URI = process.env.MONGODB_URL as string;
 
 const connectDB = async () => {
   try {
-    const mongoUrl = process.env.MONGODB_URL;
-    if (!mongoUrl) {
-      throw new Error("MONGODB_URL environment variable is not defined");
-    }
-    await mongoose.connect(mongoUrl);
-    console.log("MongoDB connected");
+    await mongoose.connect(MONGODB_URI);
+    console.log("Climafy MongoDB connected");
   } catch (error) {
-    console.error("MongoDB connection failed:", error);
-    process.exit(1);
+    console.error("Climafy MongoDB connection failed:", error);
+    throw error;
   }
 };
 
