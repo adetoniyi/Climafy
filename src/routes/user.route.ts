@@ -41,8 +41,10 @@ function asyncHandler(
  *           application/json:
  *             schema:
  *               type: object
- *               properties:
- *                 unit:
+ *               required:
+ *                 - token
+ *                properties:
+ *                 token:
  *                   type: string
  *                   example: metric
  *                 severeAlerts:
